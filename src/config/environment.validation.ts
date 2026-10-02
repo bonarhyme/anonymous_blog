@@ -23,5 +23,29 @@ export function validateEnvironment(
     throw new Error('PORT must be an integer between 1 and 65535.');
   }
 
+  const corsOrigins = config.CORS_ORIGINS;
+  if (corsOrigins !== undefined && typeof corsOrigins !== 'string') {
+    throw new Error('CORS_ORIGINS must be a comma-separated list of origins.');
+  }
+  if (typeof corsOrigins === 'string' && corsOrigins.trim()) {
+    for (const origin of corsOrigins.split(',').map((value) => value.trim())) {
+      if (!origin) {
+        throw new Error('CORS_ORIGINS must not contain empty entries.');
+      }
+      let parsedOrigin: URL;
+      try {
+        parsedOrigin = new URL(origin);
+      } catch {
+        throw new Error(`CORS_ORIGINS contains an invalid origin: ${origin}`);
+      }
+      if (
+        !['http:', 'https:'].includes(parsedOrigin.protocol) ||
+        parsedOrigin.origin !== origin
+      ) {
+        throw new Error(`CORS_ORIGINS contains an invalid origin: ${origin}`);
+      }
+    }
+  }
+
   return { ...config, PORT: port };
 }
