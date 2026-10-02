@@ -9,16 +9,21 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AnonymousId } from '../anonymous-identity/anonymous-id.decorator.js';
 import { CreatePostDto } from './dto/create-post.dto.js';
 import { ListPostsQueryDto } from './dto/list-posts-query.dto.js';
 import { PostsService } from './posts.service.js';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post()
   create(
     @AnonymousId() anonymousId: string,
