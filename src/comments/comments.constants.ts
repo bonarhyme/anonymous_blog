@@ -1,0 +1,1 @@
+export const MAX_COMMENT_CONTENT_LENGTH = 2000;
